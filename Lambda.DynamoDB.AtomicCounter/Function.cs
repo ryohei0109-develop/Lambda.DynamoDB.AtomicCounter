@@ -1,3 +1,4 @@
+using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.Core;
@@ -17,14 +18,14 @@ namespace Lambda.DynamoDB.AtomicCounter
         /// <param name="atomicCounterRequestModel"></param>
         /// <param name="context"></param>
         /// <returns>更新後の値を返します。</returns>
-        public string FunctionHandler(AtomicCounterRequestModel atomicCounterRequestModel, ILambdaContext context)
+        public int FunctionHandler(AtomicCounterRequestModel atomicCounterRequestModel, ILambdaContext context)
         {
-            string afterVersion = null;
+            int afterVersion = -1;
 
             using (AmazonDynamoDBClient client = new AmazonDynamoDBClient(
                 atomicCounterRequestModel.AccessKey,
                 atomicCounterRequestModel.SecretKey,
-                atomicCounterRequestModel.EndPoint))
+                EndPoint))
             {
                 try
                 {
@@ -56,8 +57,8 @@ namespace Lambda.DynamoDB.AtomicCounter
                         ReturnValues = "UPDATED_NEW"
                     };
 
-                    afterVersion = client.UpdateItemAsync(updateItemRequest)
-                        .Result.Attributes[atomicCounterRequestModel.CounterFieldName].N;
+                    afterVersion = int.Parse(client.UpdateItemAsync(updateItemRequest)
+                        .Result.Attributes[atomicCounterRequestModel.CounterFieldName].N);
                 }
                 catch (Exception e)
                 {
@@ -67,5 +68,7 @@ namespace Lambda.DynamoDB.AtomicCounter
 
             return afterVersion;
         }
+
+        public readonly RegionEndpoint EndPoint = RegionEndpoint.APNortheast1;
     }
 }

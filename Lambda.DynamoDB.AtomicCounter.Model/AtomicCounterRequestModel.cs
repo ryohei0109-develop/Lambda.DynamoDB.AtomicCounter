@@ -65,12 +65,6 @@ namespace Lambda.DynamoDB.AtomicCounter.Model
             set;
         }
 
-        public RegionEndpoint EndPoint
-        {
-            get;
-            set;
-        }
-
         private string _fieldName;
 
         private const string DefaultFieldName = "Version";
